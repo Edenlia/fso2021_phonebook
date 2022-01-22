@@ -2,6 +2,8 @@ const express = require('express')
 const morgan = require('morgan')
 const {stringify} = require("nodemon/lib/utils");
 const app = express()
+app.use(express.static('build'))
+require('dotenv').config()
 
 app.use(express.json())
 // const logger = morgan('tiny')
@@ -122,7 +124,7 @@ app.get('/info', (request, response) => {
 
 app.use(unknownEndpoint)
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })

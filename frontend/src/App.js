@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import personService from "./services/persons"
+import peopleService from "./services/people"
 import './index.css'
 
 const Filter = (props) => {
@@ -45,10 +45,10 @@ const PersonForm = (props) => {
   )
 }
 
-const Persons = (props) => {
+const People = (props) => {
   return (
     <div>
-      {props.personShow.map(person => <div key={person.id}>{person.name} {person.number}
+      {props.peoplehow.map(person => <div key={person.id}>{person.name} {person.number}
         <button onClick={() => props.deletePerson(person)}>delete</button>
       </div>)}
     </div>
@@ -56,7 +56,7 @@ const Persons = (props) => {
 }
 
 const App = () => {
-  const [persons, setPersons] = useState([])
+  const [people, setpeople] = useState([])
   const [filter, setFilter] = useState('')
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
@@ -66,20 +66,21 @@ const App = () => {
 
   const deletePerson = (person) => {
     if (window.confirm(`Delete ${person.name}`)) {
-      personService.deletePerson(person.id)
+      peopleService.deletePerson(person.id)
         .then(response => {
           console.log(response)
+          Notify(`Deleted`, 1)
           getAll()
-        }).catch(error => Notify(`Information of ${person.name} has already been removed from server`, 2))
+        }).catch(error => Notify(`${error.response.data.error}`, 2))
     }
   }
 
   const getAll = () => {
-    personService.getAll()
+    peopleService.getAll()
       .then(response => {
-        setPersons(response.data)
+        setpeople(response.data)
       }).catch(error => {
-      alert("error")
+      Notify(`${error.response.data.error}`, 2)
     })
   }
 
@@ -93,33 +94,34 @@ const App = () => {
 
   const addPerson = (person) => {
     // console.log(person)
-    personService.create(person)
+    peopleService.create(person)
       .then(response => {
         console.log(response.data)
-        setPersons(persons.concat(response.data))
+        setpeople(people.concat(response.data))
         Notify(`Added '${person.name}`, 1)
       }).catch(error => {
-      Notify(`Information of ${person.name} has already been removed from server`, 2)
+        console.log(error.response.data.error)
+      Notify(`${error.response.data.error}`, 2)
     })
   }
 
   const updatePerson = (person) => {
-    personService.update(person.id, person)
+    peopleService.update(person.id, person)
       .then(response => {
         console.log(response)
         const index = response.data
-        const copy = persons.map(p => p.id === person.id ? index : p)
-        setPersons(copy)
+        const copy = people.map(p => p.id === person.id ? index : p)
+        setpeople(copy)
         Notify(`Updated ${person.name}`, 1)
       }).catch(error => {
-      Notify(`Information of ${person.name} has already been removed from server`, 2)
+      Notify(`${error.response.data.error}`, 2)
     })
   }
 
   useEffect(getAll, [])
 
-  // const personShow = persons.filter(person => person.name.toLocaleLowerCase().includes(filter.toLocaleLowerCase()))
-  // const personShow = persons
+  // const peoplehow = people.filter(person => person.name.toLocaleLowerCase().includes(filter.toLocaleLowerCase()))
+  // const peoplehow = people
 
   const handleChangeNewName = (event) => {
     setNewName(event.target.value)
@@ -137,8 +139,8 @@ const App = () => {
     event.preventDefault()
     const person = {name: newName, number: newNumber}
     // console.log(person)
-    if (persons.find(item => item.name === person.name)) {
-      const previous = persons.find(item => item.name === person.name)
+    if (people.find(item => item.name === person.name)) {
+      const previous = people.find(item => item.name === person.name)
       person.id = previous.id
       console.log(person)
       if (window.confirm(`${person.name} is already added to phonebook, replace the old number with a new one?`)) {
@@ -163,9 +165,9 @@ const App = () => {
       <PersonForm submitHandler={submitForm} newName={newName} newNumber={newNumber}
                   nameHandler={handleChangeNewName} numberHandler={handleChangeNewNumber}/>
       <h3>Numbers</h3>
-      {/*{personShow.map(person => <div key={person.name}>{person.name} {person.number}</div>)}*/}
-      <Persons
-        personShow={persons.filter(person => person.name.toLocaleLowerCase().includes(filter.toLocaleLowerCase()))}
+      {/*{peoplehow.map(person => <div key={person.name}>{person.name} {person.number}</div>)}*/}
+      <People
+        peoplehow={people.filter(person => person.name.toLocaleLowerCase().includes(filter.toLocaleLowerCase()))}
         deletePerson={deletePerson}/>
     </div>
   )
